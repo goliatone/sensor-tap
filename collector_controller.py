@@ -14,12 +14,28 @@ class PIRReader(object):
     def __init__(self, pin_number=8):
         super(PIRReader, self).__init__()
         self._pin_number = pin_number
-        grovepi.pinMode(pin_number, "INPUT")
         self.value = None
+        grovepi.pinMode(pin_number, "INPUT")
 
     def collect(self):
-        self.value = grovepi.digitalRead(self._pin_number)
-        if self.verbose: print "MOVEMENT: ", self.value
+        movement = grovepi.digitalRead(self._pin_number)
+        self.value = { "m": movement }
+        if self.verbose: print "PIR: ", movement
+        return self.value
+
+
+class DHTReader(object):
+    """DHTReader"""
+    def __init__(self, pin_number=7):
+        super(DHTReader, self).__init__()
+        self._pin_number = pin_number
+        self.value = None
+        grovepi.pinMode(pin_number, "INPUT")
+
+    def collect(self):
+        [ temp, hum ] = grovepi.dht(self._pin_number, 1)
+        self.value = { "t": temp, "h": hum }
+        if self.verbose: print "DHT: ", self.value
         return self.value
 
 
@@ -65,9 +81,7 @@ def main():
     parser.add_argument('-P', '--port', required=True, help='Port to build HTTP connection URL')
     args = parser.parse_args()
 
-    print args.foo,
-    if args.bar:
-        print args.bar
+
 
 if __name__ == '__main__':
     try:
