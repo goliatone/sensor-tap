@@ -42,4 +42,5 @@ class Command(object):
 
     def tick(self, count):
         if count % self._interval == 0:
-            self.func()
+            return self.func()
+        return None
