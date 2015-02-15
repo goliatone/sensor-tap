@@ -85,7 +85,7 @@ params = []
 DEBUG = True
 
 
-sound_sensor = 1 # Analog
+sound_sensor = 0 # Analog
 light_sensor = 2 # Analog
 dht_sensor = 7   # Digital
 pir_sensor = 8   # Digital
