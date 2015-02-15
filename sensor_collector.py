@@ -106,7 +106,7 @@ while True:
 
         if count % 32 == 0:
             value = collect_light()
-            log('light = {l}%', value)
+            log('light = {l}', value)
 
         if count % 2 == 0:
             value = collect_sound(value)
@@ -125,5 +125,5 @@ while True:
         count += 1
         time.sleep(1)
 
-    except (IOError,TypeError) as e:
+    except (IOError,TypeError, Exception) as e:
         print 'Error: ', e
