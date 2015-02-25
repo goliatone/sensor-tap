@@ -24,7 +24,7 @@ def request(payload):
 
 
 def collect_dht(value=None):
-    if not value: value = {}
+    if not value: value = get_default_payload()
     try:
         [ temp, hum ] = grovepi.dht(dht_sensor, 1)
         value.update({'t': temp, 'h': hum})
@@ -34,7 +34,7 @@ def collect_dht(value=None):
 
 
 def collect_pir(value=None):
-    if not value: value = {}
+    if not value: value = get_default_payload()
     try:
         move = grovepi.digitalRead(pir_sensor)
         value.update({'m': move})
@@ -43,7 +43,7 @@ def collect_pir(value=None):
     return value
 
 def collect_light(value=None):
-    if not value: value = {}
+    if not value: value = get_default_payload()
     try:
         light = grovepi.analogRead(light_sensor)
         value.update({'l': light})
@@ -52,7 +52,7 @@ def collect_light(value=None):
     return value
 
 def collect_sound(value=None):
-    if not value: value = {}
+    if not value: value = get_default_payload()
     try:
         sound = grovepi.analogRead(sound_sensor)
         value.update({'s': sound})
@@ -64,6 +64,9 @@ def collect_sound(value=None):
 def collect_timestamp(value):
     value.update({'timestamp': int(time.time())})
     return value
+
+def get_default_payload():
+    return {'uuid': UUID}
 
 
 def log(msg, params):
@@ -78,6 +81,7 @@ URI = '/sensor/collect'
 HOST = '192.168.1.145'
 PORT = '3000'
 URL_TEMPLATE = 'http://%s:%s%s'
+UUID = '34add6809dd36514dd43811455cfb596'
 
 count = 0
 value = {}
