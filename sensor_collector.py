@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
+import sys
+import argparse
+import traceback
 import grovepi
 import urllib, httplib
 import time
@@ -89,20 +93,11 @@ def log(msg, params):
             print "LOG Exception: %s" % e
 
 
-config = ConfigParser.ConfigParser()
-config.read('config.ini')
-
-# URI = '/sensor/collect'
-# HOST = '192.168.1.145'
-# PORT = '3000'
-# URL_TEMPLATE = 'http://%s:%s%s'
-# UUID = '34add6809dd36514dd43811455cfb596'
-URI = config.get('requests', 'uri')
-HOST = config.get('requests', 'host')
-PORT = config.get('requests', 'port')
-URL_TEMPLATE = config.get('requests', 'url_template')
-
-UUID = config.get('auth', 'uuid')
+URI = ''
+HOST = ''
+PORT = ''
+URL_TEMPLATE = ''
+UUID = ''
 
 count = 0
 value = {}
@@ -116,43 +111,88 @@ DHT_SENSOR = 7   # Digital
 PIR_SENSOR = 8   # Digital
 SONIC_SENSOR = 4 # Digital
 
-grovepi.pinMode(PIR_SENSOR, 'INPUT')
+
 
 
 def select_unique(data):
     return [i for n, i in enumerate(data) if i not in data[n + 1:]]
 
 
-while True:
+def run():
+    #This DOES feel nasty. Refactor me, please?!
+    global count
+    global value
+    global params
+
+    while True:
+        try:
+            if count % 16 == 0:
+                value = collect_dht()
+                log('temp = {t} C\thumidity = {h}%', value)
+
+            if count % 32 == 0:
+                value = collect_light()
+                log('light = {l}', value)
+
+            if count % 2 == 0:
+                value = collect_sound(value)
+                log('sound= {s}', value)
+            # if count % 2 == 0:
+                value = collect_pir(value)
+                log('movement= {m}', value)
+            # if count % 2 == 0:
+                value = collect_ultrasonic(value)
+                log('ultrasonic= {u}', value)
+            # if count % 2 == 0:
+                value = collect_timestamp(value)
+
+            if count % 48 == 0 and len(params) != 0:
+                params = select_unique(params)
+                params = request(params)
+            else: params.append(value.copy())
+
+            count += 1
+            time.sleep(1)
+
+        except (IOError,TypeError, Exception) as e:
+            print 'Error: ', e
+
+
+def configure(path='config.ini'):
+    config = ConfigParser.ConfigParser()
+    config.read(path)
+
+    URI = config.get('requests', 'uri')
+    HOST = config.get('requests', 'host')
+    PORT = config.get('requests', 'port')
+    URL_TEMPLATE = config.get('requests', 'url_template')
+    UUID = config.get('auth', 'uuid')
+    print "Initialize %s" %UUID
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Sensor Collector')
+    parser.add_argument('-C', '--config', default='config.ini', help='Path to config file')
+    args = parser.parse_args()
+
+    config_path = args.config
+    configure(path=config_path)
+
+
+    grovepi.pinMode(PIR_SENSOR, 'INPUT')
+
+    run()
+
+
+if __name__ == '__main__':
     try:
-
-        if count % 16 == 0:
-            value = collect_dht()
-            log('temp = {t} C\thumidity = {h}%', value)
-
-        if count % 32 == 0:
-            value = collect_light()
-            log('light = {l}', value)
-
-        if count % 2 == 0:
-            value = collect_sound(value)
-            log('sound= {s}', value)
-        # if count % 2 == 0:
-            value = collect_pir(value)
-            log('movement= {m}', value)
-        # if count % 2 == 0:
-            value = collect_ultrasonic(value)
-            log('ultrasonic= {u}', value)
-        # if count % 2 == 0:
-            value = collect_timestamp(value)
-
-        if count % 48 == 0 and len(params) != 0:
-            params = select_unique(params)
-            params = request(params)
-        else: params.append(value.copy())
-
-        count += 1
-        time.sleep(1)
-
-    except (IOError,TypeError, Exception) as e:
-        print 'Error: ', e
+        main()
+        sys.exit(0)
+    except KeyboardInterrupt, e:
+        raise e
+    except SystemExit, e:
+        raise e
+    except Exception, e:
+        print str(e)
+        traceback.print_exc()
+        sys.exit(1)
