@@ -7,7 +7,7 @@ import time
 import requests
 import json
 from collections import OrderedDict
-
+import ConfigParser
 
 def request(payload):
     if not payload: return []
@@ -26,7 +26,7 @@ def request(payload):
 def collect_dht(value=None):
     if not value: value = get_default_payload()
     try:
-        [ temp, hum ] = grovepi.dht(dht_sensor, 1)
+        [ temp, hum ] = grovepi.dht(DHT_SENSOR, 1)
         value.update({'t': temp, 'h': hum})
     except (IOError, TypeError) as e:
         print 'DHT IOError: ', e
@@ -36,8 +36,18 @@ def collect_dht(value=None):
 def collect_pir(value=None):
     if not value: value = get_default_payload()
     try:
-        move = grovepi.digitalRead(pir_sensor)
+        move = grovepi.digitalRead(PIR_SENSOR)
         value.update({'m': move})
+    except (IOError, TypeError) as e:
+        print 'PIR IOError: ', e
+    return value
+
+
+def collect_ultrasonic(value=None):
+    if not value: value = get_default_payload()
+    try:
+        sensor = grovepi.ultrasonicRead(SONIC_SENSOR)
+        value.update({'u': sensor})
     except (IOError, TypeError) as e:
         print 'PIR IOError: ', e
     return value
@@ -45,16 +55,17 @@ def collect_pir(value=None):
 def collect_light(value=None):
     if not value: value = get_default_payload()
     try:
-        light = grovepi.analogRead(light_sensor)
+        light = grovepi.analogRead(LIGHT_SENSOR)
         value.update({'l': light})
     except (IOError, TypeError) as e:
         print 'LIGHT SENSOR IOError: ', e
     return value
 
+
 def collect_sound(value=None):
     if not value: value = get_default_payload()
     try:
-        sound = grovepi.analogRead(sound_sensor)
+        sound = grovepi.analogRead(SOUND_SENSOR)
         value.update({'s': sound})
     except (IOError, TypeError) as e:
         print 'SOUND SENSOR IOError: ', e
@@ -64,6 +75,7 @@ def collect_sound(value=None):
 def collect_timestamp(value):
     value.update({'timestamp': int(time.time())})
     return value
+
 
 def get_default_payload():
     return {'uuid': UUID}
@@ -77,11 +89,20 @@ def log(msg, params):
             print "LOG Exception: %s" % e
 
 
-URI = '/sensor/collect'
-HOST = '192.168.1.145'
-PORT = '3000'
-URL_TEMPLATE = 'http://%s:%s%s'
-UUID = '34add6809dd36514dd43811455cfb596'
+config = ConfigParser.ConfigParser()
+config.read('config.ini')
+
+# URI = '/sensor/collect'
+# HOST = '192.168.1.145'
+# PORT = '3000'
+# URL_TEMPLATE = 'http://%s:%s%s'
+# UUID = '34add6809dd36514dd43811455cfb596'
+URI = config.get('requests', 'uri')
+HOST = config.get('requests', 'host')
+PORT = config.get('requests', 'port')
+URL_TEMPLATE = config.get('requests', 'url_template')
+
+UUID = config.get('auth', 'uuid')
 
 count = 0
 value = {}
@@ -89,12 +110,13 @@ params = []
 DEBUG = True
 
 
-sound_sensor = 0 # Analog
-light_sensor = 2 # Analog
-dht_sensor = 7   # Digital
-pir_sensor = 8   # Digital
+SOUND_SENSOR = 0 # Analog
+LIGHT_SENSOR = 2 # Analog
+DHT_SENSOR = 7   # Digital
+PIR_SENSOR = 8   # Digital
+SONIC_SENSOR = 4 # Digital
 
-grovepi.pinMode(pir_sensor, 'INPUT')
+grovepi.pinMode(PIR_SENSOR, 'INPUT')
 
 
 def select_unique(data):
@@ -118,6 +140,9 @@ while True:
         # if count % 2 == 0:
             value = collect_pir(value)
             log('movement= {m}', value)
+        # if count % 2 == 0:
+            value = collect_ultrasonic(value)
+            log('ultrasonic= {u}', value)
         # if count % 2 == 0:
             value = collect_timestamp(value)
 
