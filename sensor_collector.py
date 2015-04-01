@@ -13,6 +13,26 @@ import json
 from collections import OrderedDict
 import ConfigParser
 
+
+URI = ''
+HOST = ''
+PORT = ''
+URL_TEMPLATE = ''
+UUID = ''
+
+count = 0
+value = {}
+params = []
+DEBUG = True
+
+
+SOUND_SENSOR = 0 # Analog
+LIGHT_SENSOR = 2 # Analog
+DHT_SENSOR = 7   # Digital
+PIR_SENSOR = 8   # Digital
+SONIC_SENSOR = 4 # Digital
+
+
 def request(payload):
     if not payload: return []
 
@@ -91,27 +111,6 @@ def log(msg, params):
             print msg.format(**params)
         except Exception as e:
             print "LOG Exception: %s" % e
-
-
-URI = ''
-HOST = ''
-PORT = ''
-URL_TEMPLATE = ''
-UUID = ''
-
-count = 0
-value = {}
-params = []
-DEBUG = True
-
-
-SOUND_SENSOR = 0 # Analog
-LIGHT_SENSOR = 2 # Analog
-DHT_SENSOR = 7   # Digital
-PIR_SENSOR = 8   # Digital
-SONIC_SENSOR = 4 # Digital
-
-
 
 
 def select_unique(data):
