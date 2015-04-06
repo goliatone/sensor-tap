@@ -9,6 +9,10 @@ chmod 755 /etc/init.d/sensor-tap
 sudo update-rc.d sensor-tap defaults
 ```
 
+### TODO:
+- Add login
+- Make for realz!
+
 Check out:
 https://github.com/taka-wang/py-beacon
 
