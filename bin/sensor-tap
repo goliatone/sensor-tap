@@ -16,7 +16,7 @@ APP_ROOT=/home/pi/CODE/sensor-tap
 DAEMON=$APP_ROOT/sensor_collector.py
 
 # Add any command line options for your daemon here
-DAEMONARGS=""
+DAEMONARGS="-C $APP_ROOT/config.ini"
 
 # The process ID of the script when it runs is stored here:
 PIDFILE=/var/run/$NAME.pid
