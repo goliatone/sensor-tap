@@ -10,7 +10,7 @@ sudo update-rc.d sensor-tap defaults
 ```
 
 ### TODO:
-- Add login
+- Add logger
 - Make for realz!
 
 Check out:
