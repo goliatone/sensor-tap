@@ -13,6 +13,8 @@ sudo update-rc.d sensor-tap defaults
 - Add logger
 - Make for realz!
 
+http://linuxcommand.org/man_pages/logrotate8.html
+
 Check out:
 https://github.com/taka-wang/py-beacon
 
